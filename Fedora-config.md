@@ -12,7 +12,7 @@ Make the following changes:
   max_parallel_downloads=10
   ```
 to write changes: Ctrl+O , then Ctrl+X to exit
-- Run the following without even thinking:
+## Run the following without even thinking:
 ```bash
     -  sudo dnf -y clean all
     -  sudo dnf install -y https://download1.rpmfusion.org/free/fedora/rpmfusion-free-release-$(rpm -E %fedora).noarch.rpm
@@ -73,17 +73,51 @@ dbus-monitor --system "type='signal',path='/org/freedesktop/UPower/devices/batte
    systemd-analyze
    systemd-analyze blame
    ```
-3. clears cache : ``` sudo dnf clean all```
 
-4. Optimize startup by masking systemd-udev-settle:
+2. Optimize startup by masking systemd-udev-settle:
 ```bash
 sudo systemctl mask systemd-udev-settle
 ```
 [Why disable this?](https://www.freedesktop.org/software/systemd/man/systemd-udev-settle.service.html)
 
-4.Optimize startup by disabling NetworkManager-wait-online.service:
+3.Optimize startup by disabling NetworkManager-wait-online.service:
 ```bash
 sudo systemctl disable NetworkManager-wait-online.service
 ```
 [Why?](https://askubuntu.com/questions/1018576/what-does-networkmanager-wait-online-service-do)
 
+##  Configure Swappiness
+
+**1. Check the Current Swappiness Value**
+```bash
+cat /proc/sys/vm/swappiness
+```
+**2. Create a New sysctl Configuration File:**
+It's recommended to create a new configuration file in `/etc/sysctl.d/` rather than editing `/etc/sysctl.conf` directly. This approach keeps custom settings organized and avoids conflicts with package updates.
+
+```bash
+sudo nano /etc/sysctl.d/99-swappiness.conf
+```
+In the opened file, add the following line:
+
+```bash
+vm.swappiness=10
+```
+Save and exit the editor (`Ctrl+O`, `Enter`, then `Ctrl+X`).
+
+Apply the Changes Immediately:
+```bash
+sudo sysctl --system
+```
+
+## Other important commands :
+
+Trim SSD :
+```bash 
+sudo fstrim -av
+```
+
+Clears cache :
+```bash
+sudo dnf clean all
+```
