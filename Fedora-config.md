@@ -1,15 +1,18 @@
-Before running any Command make changes to config file:
-- run: sudo nano /etc/dnf/dnf.conf
-- Make the following changes:
-  	gpgcheck=1
-	installonly_limit=3
-	clean_requirements_on_remove=True
-	best=False
-	skip_if_unavailable=True
-	max_parallel_downloads=10
-- to write changes: Ctrl+O , then Ctrl+X to exit
-
-Run the following without even thinking:
+## Before running any Command make changes to config file:
+- ```bash
+  sudo nano /etc/dnf/dnf.conf
+  ```
+Make the following changes:
+- ```bash
+  gpgcheck=1
+  installonly_limit=3
+  clean_requirements_on_remove=True
+  best=False
+  skip_if_unavailable=True
+  max_parallel_downloads=10
+  ```
+to write changes: Ctrl+O , then Ctrl+X to exit
+- Run the following without even thinking:
 ```bash
     -  sudo dnf -y clean all
     -  sudo dnf install -y https://download1.rpmfusion.org/free/fedora/rpmfusion-free-release-$(rpm -E %fedora).noarch.rpm
@@ -25,7 +28,7 @@ Run the following without even thinking:
     - dconf write /org/gnome/Ptyxis/Profiles/<identifier>/opacity 0.9
 ```
 
- Install the following extensions (must have) :
+ ## Install the following extensions (must have) :
  - Blur my shell
  - clipboard Indicator
  - Dash to Dock
@@ -38,7 +41,7 @@ Run the following without even thinking:
  - screenshot-tool (Set shortcut)
  - SearchLight
  
- Furthur settings to change:
+ ## Furthur settings to change:
  - Check if system has fastboot enabled in UEFI
  - turn on right click under settings
  - Change Wallpaper
@@ -47,13 +50,9 @@ Run the following without even thinking:
  - Customise your terminal (shortcuts , colours)
  - go to firefox About:config -> apz.touch_acceleration_factor_y set to 0.4 (fix scrolling)
  - Check how to turn on SSD trimming
- - Optimize battery : https://www.youtube.com/watch?v=GDdGK8Z_qzs
+ - Optimize battery : [video](https://www.youtube.com/watch?v=GDdGK8Z_qzs) ,[article](https://knowledgebase.frame.work/optimizing-fedora-battery-life-r1baXZh)
 
-Code :
-- check startup time and analyse : ```systemd-analyze``` and ```systemd-analyze blame```
-- clears cache : ``` sudo dnf clean all```
-
-Auto Switch Power modes :
+- Auto Switch Power modes :
 Check : https://github.com/gridhead/switcheroo
 ```bash
 dbus-monitor --system "type='signal',path='/org/freedesktop/UPower/devices/battery_BAT0',member='PropertiesChanged'" | while read LINE; do
@@ -66,4 +65,25 @@ dbus-monitor --system "type='signal',path='/org/freedesktop/UPower/devices/batte
             LEVEL="balanced"
 ```
 
-Optimizing Battery : https://knowledgebase.frame.work/optimizing-fedora-battery-life-r1baXZh
+
+## Startup optimizations :
+
+1. check startup time and analyse :
+   ```bash
+   systemd-analyze
+   systemd-analyze blame
+   ```
+3. clears cache : ``` sudo dnf clean all```
+
+4. Optimize startup by masking systemd-udev-settle:
+```bash
+sudo systemctl mask systemd-udev-settle
+```
+[Why disable this?](https://www.freedesktop.org/software/systemd/man/systemd-udev-settle.service.html)
+
+4.Optimize startup by disabling NetworkManager-wait-online.service:
+```bash
+sudo systemctl disable NetworkManager-wait-online.service
+```
+[Why?](https://askubuntu.com/questions/1018576/what-does-networkmanager-wait-online-service-do)
+
