@@ -5,7 +5,7 @@
 Make the following changes:
 - ```bash
   gpgcheck=1
-  installonly_limit=3
+  installonly_limit=2
   clean_requirements_on_remove=True
   best=False
   skip_if_unavailable=True
@@ -38,18 +38,15 @@ to write changes: Ctrl+O , then Ctrl+X to exit
  - unblank Lock Screen 
  - Vitals
  - Gnome Tweaks
- - screenshot-tool (Set shortcut)
  - SearchLight
  
  ## Furthur settings to change:
  - Check if system has fastboot enabled in UEFI
  - turn on right click under settings
  - Change Wallpaper
- - Turn On wallpaper
  - Change Screenshot Shortcut from keyboard shortcut settings 
  - Customise your terminal (shortcuts , colours)
  - go to firefox About:config -> apz.touch_acceleration_factor_y set to 0.4 (fix scrolling)
- - Check how to turn on SSD trimming
  - Optimize battery : [video](https://www.youtube.com/watch?v=GDdGK8Z_qzs) ,[article](https://knowledgebase.frame.work/optimizing-fedora-battery-life-r1baXZh)
 
 - Auto Switch Power modes :
@@ -80,7 +77,7 @@ sudo systemctl mask systemd-udev-settle
 ```
 [Why disable this?](https://www.freedesktop.org/software/systemd/man/systemd-udev-settle.service.html)
 
-3.Optimize startup by disabling NetworkManager-wait-online.service:
+3.Optimize startup by disabling NetworkManager-wait-online.service (Already mentioned above):
 ```bash
 sudo systemctl disable NetworkManager-wait-online.service
 ```
@@ -98,7 +95,7 @@ It's recommended to create a new configuration file in `/etc/sysctl.d/` rather t
 ```bash
 sudo nano /etc/sysctl.d/99-swappiness.conf
 ```
-In the opened file, add the following line:
+In the opened file, add the following line (new fedora versions should already have this):
 
 ```bash
 vm.swappiness=10
