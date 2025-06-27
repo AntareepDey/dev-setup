@@ -164,3 +164,15 @@ Remove unused Packedges :
 ```bash
 sudo dnf autoremove
 ```
+
+## App Configurations :
+
+1. If Using edge, to enable wayland based features like pinch to zoom.
+   ```bash
+     nano ~/.var/app/com.microsoft.Edge/config/edge-flags.conf
+   ```
+   Then write the following inside the file: 
+    ```bash
+    --ozone-platform=wayland
+    --enable-features=UseOzonePlatform
+    ```  
