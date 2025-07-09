@@ -89,19 +89,27 @@ to write changes: Ctrl+O , then Ctrl+X to exit
 7. go to firefox About:config -> apz.touch_acceleration_factor_y set to 0.4 (fix scrolling)
 8. Optimize battery : [video](https://www.youtube.com/watch?v=GDdGK8Z_qzs) ,[article](https://knowledgebase.frame.work/optimizing-fedora-battery-life-r1baXZh)
 
-9. Auto Switch Power modes :
-Check : https://github.com/gridhead/switcheroo
+9. **Use TLP:**
+- Remove tuned and tuned-ppd (default fedora power implementation) :
 ```bash
-dbus-monitor --system "type='signal',path='/org/freedesktop/UPower/devices/battery_BAT0',member='PropertiesChanged'" | while read LINE; do
-    echo ${LINE} | grep battery_BAT0 | grep -q PropertiesChanged
-    if [ $? -eq 0 ]; then
-        BATT_STAT=$(dbus-send --print-reply=literal --system --dest=org.freedesktop.UPower /org/freedesktop/UPower/devices/battery_BAT0 org.freedesktop.DBus.Properties.Get  string:org.freedesktop.UPower.Device string:State | awk '{ print $3; }')
-        if [ $BATT_STAT -eq 1 ] || [ $BATT_STAT -eq 4 ]; then
-            LEVEL=$(powerprofilesctl list | grep -q performance && echo "performance" || echo "balanced")
-        elif [ $BATT_STAT -eq 5 ]; then
-            LEVEL="balanced"
+   sudo dnf remove tuned tuned-ppd
+``` 
+- Install TLP :
+```bash
+   sudo dnf install tlp tlp-rdw
 ```
-
+- Enable TLP :
+```bash
+   sudo systemctl enable tlp --now
+```
+- Edit the config file : [Download](https://github.com/AntareepDey/dev-setup/blob/main/tlp.conf)
+``` bash
+    sudo nano /etc/tlp.conf
+```
+- Restart after making changes :
+```bash
+   sudo systemctl restart tlp
+```
 
 ## Startup optimizations :
 
