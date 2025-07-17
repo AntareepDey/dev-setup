@@ -183,4 +183,8 @@ sudo dnf autoremove
     ```bash
     --ozone-platform=wayland
     --enable-features=UseOzonePlatform
-    ```  
+    ```
+   If web app icons are loading under edge icon. go to .var>app>edge>data>applications. There will be number of files based on the number of webapps       you have . Remove the last few lines and modify :
+   ```bash
+   StartupWMClass=msedge-_<app-id>-Default
+   ``` 
