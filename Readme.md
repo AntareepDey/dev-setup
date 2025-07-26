@@ -1,4 +1,9 @@
-## Before running any Command make changes to config file:
+# Guide to Setup Fedora (F42 and up) :
+This guide has been compiled by me in order to make it easier for me to setup fedora on any other system in the future. Most of the methods mentioned in this document have been specifically centered around my preferences and the problem i have faced in the past to setup fedora . Please Check everything before running these on your own and at your own risk. 
+
+<br>
+
+### Before running any Command make changes to config file:
 ```bash
   sudo nano /etc/dnf/dnf.conf
   ```
@@ -13,7 +18,10 @@ Then paste the following into the file:
   max_parallel_downloads=10
   ```
 to write changes: Ctrl+O , then Ctrl+X to exit
-## Run these one by one without even thinking:
+
+<br>
+
+### Run these one by one without even thinking:
 ```bash
     -  sudo dnf -y clean all
     -  sudo dnf -y update
@@ -26,29 +34,32 @@ to write changes: Ctrl+O , then Ctrl+X to exit
     -  sudo rm /etc/xdg/autostart/org.gnome.Software.desktop
     -  sudo systemctl disable NetworkManager-wait-online.service
     -  sudo dnf remove rythmbox
+    -  sudo timedatectl set-local-rtc 0
 ```
 
-## Install the following extensions (from Gnome Extensions) :
+<br>
+
+### Install the following extensions (from Gnome Extensions) :
  - Blur my shell
  - clipboard Indicator
  - Dash to Dock
  - Just Perfection
  - LockScreen Extension
- - unblank Lock Screen 
  - Vitals
  - Gnome Tweaks
  - SearchLight
 
+<br>
 
-## Installing Apps and Configuring Git:
+### Installing Apps and Configuring Git:
 
 1. Configure Git globally (Should already be installed)
    ```bash
    git config --global user.name "<your name>" && git config --global user.email "<your email>"
    ```
-2. Install Motrix ( An open source Download Manager)
+2. Install Varia ( An open source Download Manager)
    ```bash
-   flatpak install flathub net.agalwood.Motrix
+   flatpak install flathub io.github.giantpinkrobots.varia
    ```
 3. Install Telegram
    ``` bash
@@ -65,24 +76,26 @@ to write changes: Ctrl+O , then Ctrl+X to exit
     - Paste the file [mpv_linux.conf](https://github.com/AntareepDey/dev-setup/blob/main/mpv_linux.conf) and rename it to ```mpv.conf```
     - Paste the files : [modernz.conf](https://github.com/AntareepDey/dev-setup/blob/main/modernz.conf) and [modernz.lua](https://github.com/AntareepDey/dev-setup/blob/main/modernz.lua) into the folder: ```scripts```
     - Paste the file : [fluent-system-icons.ttf](https://github.com/AntareepDey/dev-setup/blob/main/fluent-system-icons.ttf)  in the folder ```fonts``` 
+
+<br>
  
-## Furthur settings to change:
+### Further settings to change:
  
 1. Remove Libre office
-```bash
-   sudo dnf remove libreoffice*
-```
+    ```bash
+       sudo dnf remove libreoffice*
+    ```
 
 2. Make your Terminal Transparent (only if using Gnome Terminal or similar)
    You can get the identifier in the terminal settings under profile 
-```bash
-   dconf write /org/gnome/Ptyxis/Profiles/<identifier>/opacity 0.9
-```
+    ```bash
+       dconf write /org/gnome/Ptyxis/Profiles/<identifier>/opacity 0.9
+    ```
 
 3. Check if system has fastboot enabled in UEFI
-```bash
-   [ -d /sys/firmware/efi ] && echo "UEFI" || echo "BIOS"
-```   
+    ```bash
+       [ -d /sys/firmware/efi ] && echo "UEFI" || echo "BIOS"
+    ```   
 4. Turn on right click under settings if using laptop.
 5. Change Screenshot Shortcut from keyboard shortcut settings 
 6. Customise your terminal (shortcuts , colours)
@@ -91,27 +104,35 @@ to write changes: Ctrl+O , then Ctrl+X to exit
 
 9. **Use TLP:**
 - Remove tuned and tuned-ppd (default fedora power implementation) :
-```bash
-   sudo dnf remove tuned tuned-ppd
-``` 
+  ```bash
+     sudo dnf remove tuned tuned-ppd
+  ``` 
 - Install TLP :
-```bash
-   sudo dnf install tlp tlp-rdw
-```
+  ```bash
+     sudo dnf install tlp tlp-rdw
+  ```
 - Enable TLP :
-```bash
-   sudo systemctl enable tlp --now
-```
+  ```bash
+     sudo systemctl enable tlp --now
+  ```
 - Edit the config file : [Download](https://github.com/AntareepDey/dev-setup/blob/main/tlp.conf)
-``` bash
-    sudo nano /etc/tlp.conf
-```
+  ``` bash
+      sudo nano /etc/tlp.conf
+  ```
 - Restart after making changes :
-```bash
-   sudo systemctl restart tlp
-```
+  ```bash
+     sudo systemctl restart tlp
+  ```
+- Additional Intel iGPU optmization:
+  ```bash
+  sudo sysctl -w dev.i915.perf_stream_paranoid=0
+  ```
+To make it permanent go to : ```sudo nano /etc/sysctl.d/60-intel.conf```
+and write this line: ```dev.i915.perf_stream_paranoid=0``` and restart
 
-## Startup optimizations :
+<br>
+
+### Startup optimizations :
 
 1. check startup time and analyse :
    ```bash
@@ -124,9 +145,9 @@ to write changes: Ctrl+O , then Ctrl+X to exit
     sudo systemctl mask systemd-udev-settle
     ```
 
+<br>
 
-
-##  Configure Swappiness
+###  Configure Swappiness
 
 **Check the Current Swappiness Value**
 ```bash
@@ -155,8 +176,9 @@ Apply the Changes Immediately:
 ```bash
 sudo sysctl --system
 ```
+<br>
 
-## Other important commands :
+### Other important commands :
 
 Trim SSD :
 ```bash 
@@ -172,8 +194,9 @@ Remove unused Packedges :
 ```bash
 sudo dnf autoremove
 ```
+<br>
 
-## App Configurations :
+### App  Specific Configurations :
 
 1. If Using edge, to enable wayland based features like pinch to zoom.
    ```bash
