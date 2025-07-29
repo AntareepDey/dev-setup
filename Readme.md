@@ -59,7 +59,22 @@ to write changes: Ctrl+O , then Ctrl+X to exit
    ```
 2. Install Varia ( An open source Download Manager)
    ```bash
-   flatpak install flathub io.github.giantpinkrobots.varia
+   sudo dnf install axel
+   ```
+   Then use ```nano ~/.axelrc``` to open the config file , and write the following changes to it :
+   ```bash
+   reconnect_delay = 20
+   num_connections = 8
+   max_redirect = 20
+   connection_timeout = 30
+   strip_cgi_parameters = 1
+   default_filename = default
+   save_state_interval = 10
+   verbose = 1
+   ```
+   To use it : (first cd into the directory where you want to download the file)
+   ```bash
+   axel <link-to-download>
    ```
 3. Install Telegram
    ``` bash
