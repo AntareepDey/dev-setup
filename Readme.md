@@ -45,7 +45,6 @@ to write changes: Ctrl+O , then Ctrl+X to exit
  - Dash to Dock
  - Just Perfection
  - LockScreen Extension
- - Vitals
  - Gnome Tweaks
  - SearchLight
 
@@ -57,7 +56,7 @@ to write changes: Ctrl+O , then Ctrl+X to exit
    ```bash
    git config --global user.name "<your name>" && git config --global user.email "<your email>"
    ```
-2. Install Varia ( An open source Download Manager)
+2. Install Axel ( An CLI based Download Manager)
    ```bash
    sudo dnf install axel
    ```
@@ -130,7 +129,7 @@ to write changes: Ctrl+O , then Ctrl+X to exit
   ```bash
      sudo systemctl enable tlp --now
   ```
-- Edit the config file : [Download](https://github.com/AntareepDey/dev-setup/blob/main/tlp.conf)
+- Replace the config file to this : [Download](https://github.com/AntareepDey/dev-setup/blob/main/tlp.conf)
   ``` bash
       sudo nano /etc/tlp.conf
   ```
@@ -226,3 +225,43 @@ sudo dnf autoremove
    ```bash
    StartupWMClass=msedge-_<app-id>-Default
    ``` 
+
+### Quality of Life Improvements :
+
+#### Configure an OCR based screenshot tool using (mostly)inbuilt libraries
+
+1. First Install the required packedges :
+   ```bash 
+      sudo dnf install tesseract tesseract-langpack-eng gnome-screenshot wl-clipboard
+   ```
+
+2. Create a file named "screenshot_ocr.sh" and write this to it (modify the path if need be):
+   ```bash
+      #!/bin/bash
+
+      # Modify this path if needed:
+      SCREENSHOT_DIR="/home/antareep/Pictures/Screenshots"
+      mkdir -p "$SCREENSHOT_DIR"
+
+      # Generate a timestamp for the filename
+      TIMESTAMP=$(date +%Y%m%d_%H%M%S)
+
+      # Define the screenshot path
+      SCREENSHOT_PATH="$SCREENSHOT_DIR/screenshot_${TIMESTAMP}.png"
+
+      # Take a screenshot of a selected area and save it to the defined path
+      gnome-screenshot -a -f "$SCREENSHOT_PATH"
+
+      # Extract text using Tesseract and pipe directly to processing without saving to a file
+      # Specify English language for better accuracy and speed on English text
+      tesseract "$SCREENSHOT_PATH" - -l eng |
+         tr -cd '\11\12\15\40-\176' | grep . | perl -pe 'chomp if eof' |
+         wl-copy
+      ```   
+3. Make this executable by :
+   ```bash
+      chmod +x path/to/screenshot_ocr.sh
+   ```
+
+4. Go to Settings > Keyboard > View and customise Shortcuts> Custom Shortcuts
+   and add the `path/to/screenshot_ocr.sh` to the `Command:` box, select a shortcut and save.  
