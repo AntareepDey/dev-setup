@@ -49,13 +49,12 @@ local user_opts = {
     show_title = true,                     -- show title in the OSC (above seekbar)
     title = "${media-title}",              -- title above seekbar format: "${media-title}" or "${filename}"
     title_font_size = 24,                  -- title font size (above seekbar)
-    chapter_title_font_size = 14,          -- chapter title font size
-
+    chapter_title_font_size = 10,          -- chapter title font size
     cache_info = false,                    -- show cached time information
     cache_info_speed = false,              -- show cache speed per second
     cache_info_font_size = 12,             -- font size of the cache information
 
-    show_chapter_title = true,             -- show chapter title (above seekbar)
+    show_chapter_title = false,             -- show chapter title (above seekbar)
     chapter_fmt = "%s",                    -- format for chapter display on seekbar hover (set to "no" to disable)
 
     timetotal = true,                      -- show total time instead of remaining time
@@ -161,11 +160,11 @@ local user_opts = {
     seek_handle_size = 0.8,                -- size ratio of the seek handle (range: 0 ~ 1)
     seekrange = true,                      -- show seek range overlay
     seekrangealpha = 150,                  -- transparency of the seek range
-    livemarkers = true,                    -- update chapter markers on the seekbar when duration changes
+    livemarkers = false,                    -- update chapter markers on the seekbar when duration changes
     seekbarkeyframes = false,              -- use keyframes when dragging the seekbar
 
-    nibbles_top = true,                    -- top chapter nibbles above seekbar
-    nibbles_bottom = true,                 -- bottom chapter nibbles below seekbar
+    nibbles_top = false,                    -- top chapter nibbles above seekbar
+    nibbles_bottom = false,                 -- bottom chapter nibbles below seekbar
     nibbles_style = "triangle",            -- chapter nibble style. "triangle", "bar", or "single-bar"
 
     automatickeyframemode = true,          -- automatically set keyframes for the seekbar based on video length

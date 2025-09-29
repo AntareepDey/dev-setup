@@ -1,9 +1,8 @@
 # Guide to Setup Fedora (F42 and up) :
-This guide has been compiled by me in order to make it easier for me to setup fedora on any other system in the future. Most of the methods mentioned in this document have been specifically centered around my preferences and the problem i have faced in the past to setup fedora . Please Check everything before running these on your own and at your own risk. 
-
+This guide has been compiled by me in order to make it easier for me to setup fedora with Gnome as a window manager on any other system in the future. Most of the methods mentioned in this document have been specifically centered around my preferences and the problem I faced to setup fedora . Please Check everything before running these on your own and at your own risk. 
 <br>
 
-### Before running any Command make changes to config file:
+### [Just After Fresh Install] Before running any Command make changes to config file: 
 ```bash
   sudo nano /etc/dnf/dnf.conf
   ```
@@ -18,7 +17,6 @@ Then paste the following into the file:
   max_parallel_downloads=10
   ```
 to write changes: Ctrl+O , then Ctrl+X to exit
-
 <br>
 
 ### Run these one by one without even thinking:
@@ -56,7 +54,7 @@ to write changes: Ctrl+O , then Ctrl+X to exit
    ```bash
    git config --global user.name "<your name>" && git config --global user.email "<your email>"
    ```
-2. Install Axel ( An CLI based Download Manager)
+2. Install Axel (A CLI based Download Manager)
    ```bash
    sudo dnf install axel
    ```
@@ -93,14 +91,14 @@ to write changes: Ctrl+O , then Ctrl+X to exit
 
 <br>
  
-### Further settings to change:
+### [Optional] Further settings to change:
  
 1. Remove Libre office
     ```bash
        sudo dnf remove libreoffice*
     ```
 
-2. Make your Terminal Transparent (only if using Gnome Terminal or similar)
+2. Make your Terminal Transparent (only if using Gnome Terminal )
    You can get the identifier in the terminal settings under profile 
     ```bash
        dconf write /org/gnome/Ptyxis/Profiles/<identifier>/opacity 0.9
@@ -158,6 +156,21 @@ and write this line: ```dev.i915.perf_stream_paranoid=0``` and restart
     ```bash
     sudo systemctl mask systemd-udev-settle
     ```
+
+3. If after runnning `systemmd-analyze` you get a process `dnf-makecache.service` taking up al lot of time , you can configure it to startup a lot later as compared to startup :
+   ```sudo mkdir -p /etc/systemd/system/dnf-makecache.timer.d
+      sudo tee /etc/systemd/system/dnf-makecache.timer.d/override.conf > /dev/null <<'EOF'
+      
+      #Then write the following :
+      [Timer]
+      # Wait 30 minutes after boot before the first run
+      OnBootSec=30min
+      EOF
+
+      sudo systemctl daemon-reload
+      sudo systemctl restart dnf-makecache.timer
+      sudo systemctl list-timers --all | grep dnf-makecache
+   ```
 
 <br>
 
@@ -225,10 +238,11 @@ sudo dnf autoremove
    ```bash
    StartupWMClass=msedge-_<app-id>-Default
    ``` 
+   <br>
 
 ### Quality of Life Improvements :
 
-#### Configure an OCR based screenshot tool using (mostly)inbuilt libraries
+#### A. Configure an OCR based screenshot tool using (mostly)inbuilt libraries
 
 1. First Install the required packedges :
    ```bash 
