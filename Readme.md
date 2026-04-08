@@ -1,4 +1,4 @@
-# Guide to Setup Fedora (F42 and up) :
+# Guide to Setup Fedora (F42+) with Gnome:
 This guide has been compiled by me in order to make it easier for me to setup fedora with Gnome as a window manager on any other system in the future. Most of the methods mentioned in this document have been specifically centered around my preferences and the problem I faced to setup fedora . Please Check everything before running these on your own and at your own risk. 
 <br>
 
@@ -14,7 +14,7 @@ Then paste the following into the file:
   best=False
   skip_if_unavailable=True
   fastestmirror=True
-  max_parallel_downloads=10
+  max_parallel_downloads=5
   ```
 to write changes: Ctrl+O , then Ctrl+X to exit
 <br>
@@ -29,7 +29,7 @@ to write changes: Ctrl+O , then Ctrl+X to exit
     -  flatpak install flathub com.mattjakeman.ExtensionManager
     -  sudo dnf install fwupd
     -  sudo fwupdmgr get-updates
-    -  sudo rm /etc/xdg/autostart/org.gnome.Software.desktop
+    -  sudo rm /etc/xdg/autostart/org.gnome.Software.desktop #does not work
     -  sudo systemctl disable NetworkManager-wait-online.service
     -  sudo dnf remove rythmbox
     -  sudo timedatectl set-local-rtc 0
@@ -239,43 +239,3 @@ sudo dnf autoremove
    StartupWMClass=msedge-_<app-id>-Default
    ``` 
    <br>
-
-### Quality of Life Improvements :
-
-#### A. Configure an OCR based screenshot tool using (mostly)inbuilt libraries
-
-1. First Install the required packedges :
-   ```bash 
-      sudo dnf install tesseract tesseract-langpack-eng gnome-screenshot wl-clipboard
-   ```
-
-2. Create a file named "screenshot_ocr.sh" and write this to it (modify the path if need be):
-   ```bash
-      #!/bin/bash
-
-      # Modify this path if needed:
-      SCREENSHOT_DIR="/home/antareep/Pictures/Screenshots"
-      mkdir -p "$SCREENSHOT_DIR"
-
-      # Generate a timestamp for the filename
-      TIMESTAMP=$(date +%Y%m%d_%H%M%S)
-
-      # Define the screenshot path
-      SCREENSHOT_PATH="$SCREENSHOT_DIR/screenshot_${TIMESTAMP}.png"
-
-      # Take a screenshot of a selected area and save it to the defined path
-      gnome-screenshot -a -f "$SCREENSHOT_PATH"
-
-      # Extract text using Tesseract and pipe directly to processing without saving to a file
-      # Specify English language for better accuracy and speed on English text
-      tesseract "$SCREENSHOT_PATH" - -l eng |
-         tr -cd '\11\12\15\40-\176' | grep . | perl -pe 'chomp if eof' |
-         wl-copy
-      ```   
-3. Make this executable by :
-   ```bash
-      chmod +x path/to/screenshot_ocr.sh
-   ```
-
-4. Go to Settings > Keyboard > View and customise Shortcuts> Custom Shortcuts
-   and add the `path/to/screenshot_ocr.sh` to the `Command:` box, select a shortcut and save.  
