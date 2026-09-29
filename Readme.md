@@ -1,5 +1,5 @@
 # Guide to Setup Fedora (F42+) with Gnome:
-This guide has been compiled by me in order to make it easier for me to setup fedora with Gnome as a window manager on any other system in the future. Most of the methods mentioned in this document have been specifically centered around my preferences and the problem I faced to setup fedora . Please Check everything before running these on your own and at your own risk. 
+This guide has been compiled by me in order to make it easier for me to setup fedora with Gnome as a window manager on any other system in the future. This setup is opionated. Please check everything before running these on your own and at your own risk. 
 <br>
 
 ### [Just After Fresh Install] Before running any Command make changes to config file: 
@@ -29,11 +29,27 @@ to write changes: Ctrl+O , then Ctrl+X to exit
     -  flatpak install flathub com.mattjakeman.ExtensionManager
     -  sudo dnf install fwupd
     -  sudo fwupdmgr get-updates
-    -  sudo rm /etc/xdg/autostart/org.gnome.Software.desktop #does not work
     -  sudo systemctl disable NetworkManager-wait-online.service
     -  sudo dnf remove rythmbox
     -  sudo timedatectl set-local-rtc 0
 ```
+
+**Fixing Gnome Software :** This software actually serves no purpose other than being resource hog. Here is how to disable it: 
+```bash
+   # Create the override directory
+   sudo mkdir -p /etc/systemd/user/gnome-session@gnome.target.d/
+
+   # Copy the file
+   sudo cp /usr/lib/systemd/user/gnome-session@gnome.target.d/gnome.session.conf /etc/systemd/user/gnome-session@gnome.target.d/gnome.session.conf
+
+   # Remove the gnome-software lines (the comment + the Wants line)
+   sudo sed -i '/# Checking for automatic updates, etc/d; /Wants=gnome-software.service/d' /etc/systemd/user/gnome-session@gnome.target.d/gnome.session.conf
+
+   # Reload the systemd user daemon to apply changes
+   systemctl --user daemon-reload
+```
+
+
 
 <br>
 
@@ -43,8 +59,14 @@ to write changes: Ctrl+O , then Ctrl+X to exit
  - Dash to Dock
  - Just Perfection
  - LockScreen Extension
- - Gnome Tweaks
  - SearchLight
+
+ <br>
+
+ To quick restore my configs for these extensions, first download the [dconf](https://github.com/AntareepDey/dev-setup/blob/main/gnome-extension-settings.dconf) file in this repository, then run:
+```bash
+dconf load /org/gnome/shell/extensions/ < ~/gnome-extension-settings.dconf
+```
 
 <br>
 
@@ -89,6 +111,47 @@ to write changes: Ctrl+O , then Ctrl+X to exit
     - Paste the files : [modernz.conf](https://github.com/AntareepDey/dev-setup/blob/main/modernz.conf) and [modernz.lua](https://github.com/AntareepDey/dev-setup/blob/main/modernz.lua) into the folder: ```scripts```
     - Paste the file : [fluent-system-icons.ttf](https://github.com/AntareepDey/dev-setup/blob/main/fluent-system-icons.ttf)  in the folder ```fonts``` 
 
+5. Install Zed:
+   ```bash
+   curl -f https://zed.dev/install.sh | sh
+   ```
+
+6. Install Resources:
+   ```bash
+   flatpak install flathub net.nokyan.Resources
+   ```
+
+7. Install Spotify:
+   ```bash
+   flatpak install flathub com.spotify.Client
+   ```
+
+8. Install Brave Origin:
+	```bash
+	sudo dnf install dnf-plugins-core
+	
+	sudo dnf config-manager addrepo --from-repofile=https://brave-browser-rpm-release.s3.brave.com/brave-browser.repo
+	
+	sudo dnf install brave-origin   
+	```
+
+9. Install Cloudflare warp:
+   ```bash
+   sudo rpm -e 'gpg-pubkey(4fa1c3ba-61abda35)' && sudo rpm --import https://pkg.cloudflareclient.com/pubkey.gpg
+   curl -fsSl https://pkg.cloudflareclient.com/cloudflare-warp-ascii.repo | sudo tee /etc/yum.repos.d/cloudflare-warp.repo
+   sudo dnf update
+   sudo dnf install cloudflare-warp
+   ```
+
+10. Install Local Send :
+   ```bash
+   flatpak install flathub org.localsend.localsend_app
+   ```
+11. Install UV, Astro , Bun:
+   ```bash
+
+   ```
+
 <br>
  
 ### [Optional] Further settings to change:
@@ -98,23 +161,28 @@ to write changes: Ctrl+O , then Ctrl+X to exit
        sudo dnf remove libreoffice*
     ```
 
-2. Make your Terminal Transparent (only if using Gnome Terminal )
+2. Install ONLY Office    
+   ```bash
+      flatpak install flathub org.onlyoffice.desktopeditors
+   ```
+
+3. Make your Terminal Transparent (only if using Gnome Terminal )
    You can get the identifier in the terminal settings under profile 
     ```bash
        dconf write /org/gnome/Ptyxis/Profiles/<identifier>/opacity 0.9
     ```
 
-3. Check if system has fastboot enabled in UEFI
+4. Check if system has fastboot enabled in UEFI
     ```bash
        [ -d /sys/firmware/efi ] && echo "UEFI" || echo "BIOS"
     ```   
-4. Turn on right click under settings if using laptop.
-5. Change Screenshot Shortcut from keyboard shortcut settings 
-6. Customise your terminal (shortcuts , colours)
-7. go to firefox About:config -> apz.touch_acceleration_factor_y set to 0.4 (fix scrolling)
-8. Optimize battery : [video](https://www.youtube.com/watch?v=GDdGK8Z_qzs) ,[article](https://knowledgebase.frame.work/optimizing-fedora-battery-life-r1baXZh)
+5. Turn on right click under settings if using laptop.
+6. Change Screenshot Shortcut from keyboard shortcut settings 
+7. Customise your terminal (shortcuts , colours)
+8. go to firefox About:config -> apz.touch_acceleration_factor_y set to 0.4 (fix scrolling)
+9. Optimize battery : [video](https://www.youtube.com/watch?v=GDdGK8Z_qzs) ,[article](https://knowledgebase.frame.work/optimizing-fedora-battery-life-r1baXZh)
 
-9. **Use TLP:**
+10. **Use TLP:**
 - Remove tuned and tuned-ppd (default fedora power implementation) :
   ```bash
      sudo dnf remove tuned tuned-ppd
@@ -176,7 +244,7 @@ and write this line: ```dev.i915.perf_stream_paranoid=0``` and restart
 
 ###  Configure Swappiness
 
-**Check the Current Swappiness Value**
+Check the Current Swappiness Value
 ```bash
 cat /proc/sys/vm/swappiness
 ```
@@ -223,19 +291,96 @@ sudo dnf autoremove
 ```
 <br>
 
-### App  Specific Configurations :
+### Quality of life Configurations :
 
-1. If Using edge, to enable wayland based features like pinch to zoom.
-   ```bash
-     nano ~/.var/app/com.microsoft.Edge/config/edge-flags.conf
-   ```
-   Then write the following inside the file: 
-    ```bash
-    --ozone-platform=wayland
-    --enable-features=UseOzonePlatform
-    ```
-   If web app icons are loading under edge icon. go to .var>app>edge>data>applications. There will be number of files based on the number of webapps       you have . Remove the last few lines and modify :
-   ```bash
-   StartupWMClass=msedge-_<app-id>-Default
-   ``` 
+#### A . Change the auto priority of various sound sources :
+
+1. **Inspect Audio Sinks and Node Names:** Identify your system's exact audio endpoints.
+Open your terminal and list all active audio devices:
+
+```bash
+wpctl status
+```
+
+2. Note the ID numbers under the **Sinks** section, then inspect their specific `node.name` attributes:
+
+```bash
+wpctl inspect <HEADPHONES_ID> | grep 'node.name'
+wpctl inspect <HDMI_ID> | grep 'node.name'
+
+```
+
+3. **Create the WirePlumber Configuration Directory:**
+Ensure the user configuration override directory exists:
+
+```bash
+mkdir -p ~/.config/wireplumber/wireplumber.conf.d/
+
+```
+
+
+4. **Write the Priority Rules Configuration:**
+Create the override file in your editor:
+
+```bash
+nano ~/.config/wireplumber/wireplumber.conf.d/51-device-priority.conf
+
+```
+
+Add the priority definitions (**Headphones > Speakers > HDMI**):
+
+```spa
+monitor.alsa.rules = [
+  # 1. Headphones (Highest Priority)
+  {
+    matches = [
+      {
+        node.name = "~alsa_output.*HiFi__Headphones__sink"
+      }
+    ]
+    actions = {
+      update-props = {
+        priority.session = 2000
+      }
+    }
+  },
+
+  # 2. Built-in Speakers (Medium Priority)
+  {
+    matches = [
+      {
+        node.name = "~alsa_output.*HiFi__Speaker__sink"
+      }
+    ]
+    actions = {
+      update-props = {
+        priority.session = 1500
+      }
+    }
+  },
+
+  # 3. HDMI / DisplayPort Outputs (Lowest Priority)
+  {
+    matches = [
+      {
+        node.name = "~alsa_output.*HiFi__HDMI.*"
+      }
+    ]
+    actions = {
+      update-props = {
+        priority.session = 1000
+      }
+    }
+  }
+]
+
+```
+
+5. **Restart WirePlumber to Apply Changes:** No sudo required.
+Restart the WirePlumber user service:
+
+```bash
+systemctl --user restart wireplumber
+
+```
    <br>
