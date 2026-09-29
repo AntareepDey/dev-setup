@@ -1,386 +1,422 @@
-# Guide to Setup Fedora (F42+) with Gnome:
-This guide has been compiled by me in order to make it easier for me to setup fedora with Gnome as a window manager on any other system in the future. This setup is opionated. Please check everything before running these on your own and at your own risk. 
-<br>
+# Fedora (F42+) with GNOME — Setup Guide
 
-### [Just After Fresh Install] Before running any Command make changes to config file: 
-```bash
-  sudo nano /etc/dnf/dnf.conf
-  ```
-Then paste the following into the file:
-```bash
-  gpgcheck=1
-  installonly_limit=2
-  clean_requirements_on_remove=True
-  best=False
-  skip_if_unavailable=True
-  fastestmirror=True
-  max_parallel_downloads=5
-  ```
-to write changes: Ctrl+O , then Ctrl+X to exit
-<br>
+An opinionated setup guide I compiled to make re-installing Fedora with GNOME painless.
+**Check every command before running it. Use at your own risk.**
 
-### Run these one by one without even thinking:
+## Contents
+
+1. [Base System](#1-base-system)
+2. [GNOME](#2-gnome)
+3. [Applications](#3-applications)
+4. [Performance & Power](#4-performance--power)
+5. [Audio Priority (WirePlumber)](#5-audio-priority-wireplumber)
+6. [Optional Tweaks](#6-optional-tweaks)
+7. [Maintenance Commands](#7-maintenance-commands)
+
+---
+
+## 1. Base System
+
+### 1.1 DNF config (do this first, before any other command)
+
 ```bash
-    -  sudo dnf -y clean all
-    -  sudo dnf -y update
-    -  sudo dnf install https://mirrors.rpmfusion.org/free/fedora/rpmfusion-free-release-$(rpm -E %fedora).noarch.rpm https://mirrors.rpmfusion.org/nonfree/fedora/rpmfusion-nonfree-release-$(rpm -E %fedora).noarch.rpm
-    -  sudo dnf swap libva-intel-media-driver intel-media-driver --allowerasing
-    -  sudo dnf group install multimedia
-    -  flatpak install flathub com.mattjakeman.ExtensionManager
-    -  sudo dnf install fwupd
-    -  sudo fwupdmgr get-updates
-    -  sudo systemctl disable NetworkManager-wait-online.service
-    -  sudo dnf remove rythmbox
-    -  sudo timedatectl set-local-rtc 0
+sudo nano /etc/dnf/dnf.conf
 ```
 
-**Fixing Gnome Software :** This software actually serves no purpose other than being resource hog. Here is how to disable it: 
-```bash
-   # Create the override directory
-   sudo mkdir -p /etc/systemd/user/gnome-session@gnome.target.d/
+Paste:
 
-   # Copy the file
-   sudo cp /usr/lib/systemd/user/gnome-session@gnome.target.d/gnome.session.conf /etc/systemd/user/gnome-session@gnome.target.d/gnome.session.conf
-
-   # Remove the gnome-software lines (the comment + the Wants line)
-   sudo sed -i '/# Checking for automatic updates, etc/d; /Wants=gnome-software.service/d' /etc/systemd/user/gnome-session@gnome.target.d/gnome.session.conf
-
-   # Reload the systemd user daemon to apply changes
-   systemctl --user daemon-reload
+```ini
+gpgcheck=1
+installonly_limit=2
+clean_requirements_on_remove=True
+best=False
+skip_if_unavailable=True
+fastestmirror=True
+max_parallel_downloads=5
 ```
 
+Save with `Ctrl+O`, exit with `Ctrl+X`.
 
+### 1.2 Updates, repos and codecs
 
-<br>
+```bash
+sudo dnf -y clean all
+sudo dnf -y update
+sudo dnf install https://mirrors.rpmfusion.org/free/fedora/rpmfusion-free-release-$(rpm -E %fedora).noarch.rpm https://mirrors.rpmfusion.org/nonfree/fedora/rpmfusion-nonfree-release-$(rpm -E %fedora).noarch.rpm
+sudo dnf swap libva-intel-media-driver intel-media-driver --allowerasing
+sudo dnf group install multimedia
+```
 
-### Install the following extensions (from Gnome Extensions) :
- - Blur my shell
- - clipboard Indicator
- - Dash to Dock
- - Just Perfection
- - LockScreen Extension
- - SearchLight
+### 1.3 Firmware, cleanup and clock
 
- <br>
+```bash
+sudo dnf install fwupd
+sudo fwupdmgr get-updates
+sudo systemctl disable NetworkManager-wait-online.service
+sudo dnf remove rhythmbox
+sudo timedatectl set-local-rtc 0
+```
 
- To quick restore my configs for these extensions, first download the [dconf](https://github.com/AntareepDey/dev-setup/blob/main/gnome-extension-settings.dconf) file in this repository, then run:
+---
+
+## 2. GNOME
+
+### 2.1 Disable GNOME Software
+
+It serves no purpose other than being a resource hog.
+
+```bash
+# Create the override directory
+sudo mkdir -p /etc/systemd/user/gnome-session@gnome.target.d/
+
+# Copy the file
+sudo cp /usr/lib/systemd/user/gnome-session@gnome.target.d/gnome.session.conf /etc/systemd/user/gnome-session@gnome.target.d/gnome.session.conf
+
+# Remove the gnome-software lines (the comment + the Wants line)
+sudo sed -i '/# Checking for automatic updates, etc/d; /Wants=gnome-software.service/d' /etc/systemd/user/gnome-session@gnome.target.d/gnome.session.conf
+
+# Reload the systemd user daemon to apply changes
+systemctl --user daemon-reload
+```
+
+### 2.2 Extension Manager
+
+```bash
+flatpak install flathub com.mattjakeman.ExtensionManager
+```
+
+### 2.3 Extensions to install
+
+- Blur my Shell
+- Clipboard Indicator
+- Dash to Dock
+- Just Perfection
+- LockScreen Extension
+- SearchLight
+
+### 2.4 Restore extension settings
+
+Download [gnome-extension-settings.dconf](https://github.com/AntareepDey/dev-setup/blob/main/gnome-extension-settings.dconf), then:
+
 ```bash
 dconf load /org/gnome/shell/extensions/ < ~/gnome-extension-settings.dconf
 ```
 
-<br>
+---
 
-### Installing Apps and Configuring Git:
+## 3. Applications
 
-1. Configure Git globally (Should already be installed)
-   ```bash
-   git config --global user.name "<your name>" && git config --global user.email "<your email>"
-   ```
-2. Install Axel (A CLI based Download Manager)
-   ```bash
-   sudo dnf install axel
-   ```
-   Then use ```nano ~/.axelrc``` to open the config file , and write the following changes to it :
-   ```bash
-   reconnect_delay = 20
-   num_connections = 8
-   max_redirect = 20
-   connection_timeout = 30
-   strip_cgi_parameters = 1
-   default_filename = default
-   save_state_interval = 10
-   verbose = 1
-   ```
-   To use it : (first cd into the directory where you want to download the file)
-   ```bash
-   axel <link-to-download>
-   ```
-3. Install Telegram
-   ``` bash
-   flatpak install flathub org.telegram.desktop
-   ```
-4. Install and configure MPV :
-   ```bash
-   flatpak install flathub io.mpv.Mpv
-   ```
-   To configure your MPV go to : ```.var/app/io.mpv.Mpv/config/mpv```    in your system
-   <br>
-   > If the subfolders "scripts" and "fonts" do not exist create them.
-   
-    - Paste the file [mpv_linux.conf](https://github.com/AntareepDey/dev-setup/blob/main/mpv_linux.conf) and rename it to ```mpv.conf```
-    - Paste the files : [modernz.conf](https://github.com/AntareepDey/dev-setup/blob/main/modernz.conf) and [modernz.lua](https://github.com/AntareepDey/dev-setup/blob/main/modernz.lua) into the folder: ```scripts```
-    - Paste the file : [fluent-system-icons.ttf](https://github.com/AntareepDey/dev-setup/blob/main/fluent-system-icons.ttf)  in the folder ```fonts``` 
+### 3.1 Git (already installed)
 
-5. Install Zed:
-   ```bash
-   curl -f https://zed.dev/install.sh | sh
-   ```
+```bash
+git config --global user.name "<your name>" && git config --global user.email "<your email>"
+```
 
-6. Install Resources:
-   ```bash
-   flatpak install flathub net.nokyan.Resources
-   ```
+### 3.2 Axel (CLI download manager)
 
-7. Install Spotify:
-   ```bash
-   flatpak install flathub com.spotify.Client
-   ```
+```bash
+sudo dnf install axel
+```
 
-8. Install Brave Origin:
-	```bash
-	sudo dnf install dnf-plugins-core
-	
-	sudo dnf config-manager addrepo --from-repofile=https://brave-browser-rpm-release.s3.brave.com/brave-browser.repo
-	
-	sudo dnf install brave-origin   
-	```
+Config — `nano ~/.axelrc`:
 
-9. Install Cloudflare warp:
-   ```bash
-   sudo rpm -e 'gpg-pubkey(4fa1c3ba-61abda35)' && sudo rpm --import https://pkg.cloudflareclient.com/pubkey.gpg
-   curl -fsSl https://pkg.cloudflareclient.com/cloudflare-warp-ascii.repo | sudo tee /etc/yum.repos.d/cloudflare-warp.repo
-   sudo dnf update
-   sudo dnf install cloudflare-warp
-   ```
+```ini
+reconnect_delay = 20
+num_connections = 8
+max_redirect = 20
+connection_timeout = 30
+strip_cgi_parameters = 1
+default_filename = default
+save_state_interval = 10
+verbose = 1
+```
 
-10. Install Local Send :
-   ```bash
-   flatpak install flathub org.localsend.localsend_app
-   ```
-11. Install UV, Astro , Bun:
-   ```bash
+Usage (`cd` into the target directory first):
 
-   ```
+```bash
+axel <link-to-download>
+```
 
-<br>
- 
-### [Optional] Further settings to change:
- 
-1. Remove Libre office
-    ```bash
-       sudo dnf remove libreoffice*
-    ```
+### 3.3 MPV
 
-2. Install ONLY Office    
-   ```bash
-      flatpak install flathub org.onlyoffice.desktopeditors
-   ```
+```bash
+flatpak install flathub io.mpv.Mpv
+```
 
-3. Make your Terminal Transparent (only if using Gnome Terminal )
-   You can get the identifier in the terminal settings under profile 
-    ```bash
-       dconf write /org/gnome/Ptyxis/Profiles/<identifier>/opacity 0.9
-    ```
+Config lives in `.var/app/io.mpv.Mpv/config/mpv`.
 
-4. Check if system has fastboot enabled in UEFI
-    ```bash
-       [ -d /sys/firmware/efi ] && echo "UEFI" || echo "BIOS"
-    ```   
-5. Turn on right click under settings if using laptop.
-6. Change Screenshot Shortcut from keyboard shortcut settings 
-7. Customise your terminal (shortcuts , colours)
-8. go to firefox About:config -> apz.touch_acceleration_factor_y set to 0.4 (fix scrolling)
-9. Optimize battery : [video](https://www.youtube.com/watch?v=GDdGK8Z_qzs) ,[article](https://knowledgebase.frame.work/optimizing-fedora-battery-life-r1baXZh)
+> If the subfolders `scripts` and `fonts` do not exist, create them.
 
-10. **Use TLP:**
-- Remove tuned and tuned-ppd (default fedora power implementation) :
-  ```bash
-     sudo dnf remove tuned tuned-ppd
-  ``` 
-- Install TLP :
-  ```bash
-     sudo dnf install tlp tlp-rdw
-  ```
-- Enable TLP :
-  ```bash
-     sudo systemctl enable tlp --now
-  ```
-- Replace the config file to this : [Download](https://github.com/AntareepDey/dev-setup/blob/main/tlp.conf)
-  ``` bash
-      sudo nano /etc/tlp.conf
-  ```
-- Restart after making changes :
-  ```bash
-     sudo systemctl restart tlp
-  ```
-- Additional Intel iGPU optmization:
-  ```bash
-  sudo sysctl -w dev.i915.perf_stream_paranoid=0
-  ```
-To make it permanent go to : ```sudo nano /etc/sysctl.d/60-intel.conf```
-and write this line: ```dev.i915.perf_stream_paranoid=0``` and restart
+- [mpv_linux.conf](https://github.com/AntareepDey/dev-setup/blob/main/mpv_linux.conf) → rename to `mpv.conf`
+- [modernz.conf](https://github.com/AntareepDey/dev-setup/blob/main/modernz.conf) and [modernz.lua](https://github.com/AntareepDey/dev-setup/blob/main/modernz.lua) → `scripts/`
+- [fluent-system-icons.ttf](https://github.com/AntareepDey/dev-setup/blob/main/fluent-system-icons.ttf) → `fonts/`
 
-<br>
+### 3.4 Brave Origin
 
-### Startup optimizations :
+```bash
+sudo dnf install dnf-plugins-core
+sudo dnf config-manager addrepo --from-repofile=https://brave-browser-rpm-release.s3.brave.com/brave-browser.repo
+sudo dnf install brave-origin
+```
 
-1. check startup time and analyse :
-   ```bash
-   systemd-analyze
-   systemd-analyze blame
-   ```
+### 3.5 Cloudflare WARP
 
-2. Optimize startup by masking systemd-udev-settle [Why disable this?](https://www.freedesktop.org/software/systemd/man/systemd-udev-settle.service.html):
-    ```bash
-    sudo systemctl mask systemd-udev-settle
-    ```
+```bash
+sudo rpm -e 'gpg-pubkey(4fa1c3ba-61abda35)' && sudo rpm --import https://pkg.cloudflareclient.com/pubkey.gpg
+curl -fsSl https://pkg.cloudflareclient.com/cloudflare-warp-ascii.repo | sudo tee /etc/yum.repos.d/cloudflare-warp.repo
+sudo dnf update
+sudo dnf install cloudflare-warp
+```
 
-3. If after runnning `systemmd-analyze` you get a process `dnf-makecache.service` taking up al lot of time , you can configure it to startup a lot later as compared to startup :
-   ```sudo mkdir -p /etc/systemd/system/dnf-makecache.timer.d
-      sudo tee /etc/systemd/system/dnf-makecache.timer.d/override.conf > /dev/null <<'EOF'
-      
-      #Then write the following :
-      [Timer]
-      # Wait 30 minutes after boot before the first run
-      OnBootSec=30min
-      EOF
+### 3.6 Zed
 
-      sudo systemctl daemon-reload
-      sudo systemctl restart dnf-makecache.timer
-      sudo systemctl list-timers --all | grep dnf-makecache
-   ```
+```bash
+curl -f https://zed.dev/install.sh | sh
+```
 
-<br>
+Restore the optimal settings by copying [settings.json](https://github.com/AntareepDey/dev-setup/blob/main/settings.json) to `~/.config/zed/settings.json`.
 
-###  Configure Swappiness
+### 3.7 Flatpaks
 
-Check the Current Swappiness Value
+```bash
+flatpak install flathub org.telegram.desktop        # Telegram
+flatpak install flathub net.nokyan.Resources        # Resources (system monitor)
+flatpak install flathub com.spotify.Client          # Spotify
+flatpak install flathub org.localsend.localsend_app # LocalSend
+```
+
+### 3.8 uv (Python package manager)
+
+```bash
+curl -LsSf https://astral.sh/uv/install.sh | sh
+```
+
+### 3.9 Bun (JS runtime + package manager)
+
+```bash
+curl -fsSL https://bun.com/install | bash
+```
+
+---
+
+## 4. Performance & Power
+
+### 4.1 Startup time
+
+Measure first:
+
+```bash
+systemd-analyze
+systemd-analyze blame
+```
+
+Mask `systemd-udev-settle` ([why?](https://www.freedesktop.org/software/systemd/man/systemd-udev-settle.service.html)):
+
+```bash
+sudo systemctl mask systemd-udev-settle
+```
+
+If `dnf-makecache.service` shows up as a heavy item in `systemd-analyze blame`, delay it:
+
+```bash
+sudo mkdir -p /etc/systemd/system/dnf-makecache.timer.d
+sudo tee /etc/systemd/system/dnf-makecache.timer.d/override.conf > /dev/null <<'EOF'
+[Timer]
+# Wait 30 minutes after boot before the first run
+OnBootSec=30min
+EOF
+
+sudo systemctl daemon-reload
+sudo systemctl restart dnf-makecache.timer
+sudo systemctl list-timers --all | grep dnf-makecache
+```
+
+### 4.2 Swappiness
+
+Check the current value:
+
 ```bash
 cat /proc/sys/vm/swappiness
 ```
-<br>
 
->[!Important] 
-> Proceed only if your system has >8GB ram and the swappiness shown is 60 (Both must be true).
+> [!IMPORTANT]
+> Proceed only if your system has >8GB RAM **and** the swappiness shown is 60 (both must be true).
 
-
-**Create a New sysctl Configuration File:**
-It's recommended to create a new configuration file in `/etc/sysctl.d/` rather than editing `/etc/sysctl.conf` directly. This approach keeps custom settings organized and avoids conflicts with package updates.
+Create a new file in `/etc/sysctl.d/` rather than editing `/etc/sysctl.conf` directly — this keeps custom settings organized and avoids conflicts with package updates.
 
 ```bash
 sudo nano /etc/sysctl.d/99-swappiness.conf
 ```
-In the opened file, add the following line (new fedora versions should already have this):
 
-```bash
+Add (newer Fedora versions should already have this):
+
+```ini
 vm.swappiness=10
 ```
-Save and exit the editor (`Ctrl+O`, `Enter`, then `Ctrl+X`).
 
-Apply the Changes Immediately:
+Save (`Ctrl+O`, `Enter`, `Ctrl+X`), then apply:
+
 ```bash
 sudo sysctl --system
 ```
-<br>
 
-### Other important commands :
+### 4.3 TLP
 
-Trim SSD :
-```bash 
-sudo fstrim -av
-```
-
-Clears cache :
-```bash
-sudo dnf clean all
-```
-
-Remove unused Packedges :
-```bash
-sudo dnf autoremove
-```
-<br>
-
-### Quality of life Configurations :
-
-#### A . Change the auto priority of various sound sources :
-
-1. **Inspect Audio Sinks and Node Names:** Identify your system's exact audio endpoints.
-Open your terminal and list all active audio devices:
+Replaces Fedora's default `tuned` / `tuned-ppd`.
 
 ```bash
-wpctl status
+sudo dnf remove tuned tuned-ppd
+sudo dnf install tlp tlp-rdw
+sudo systemctl enable tlp --now
 ```
 
-2. Note the ID numbers under the **Sinks** section, then inspect their specific `node.name` attributes:
+Replace the config with [tlp.conf](https://github.com/AntareepDey/dev-setup/blob/main/tlp.conf):
 
 ```bash
-wpctl inspect <HEADPHONES_ID> | grep 'node.name'
-wpctl inspect <HDMI_ID> | grep 'node.name'
-
+sudo nano /etc/tlp.conf
+sudo systemctl restart tlp
 ```
 
-3. **Create the WirePlumber Configuration Directory:**
-Ensure the user configuration override directory exists:
+### 4.4 Intel iGPU
 
 ```bash
-mkdir -p ~/.config/wireplumber/wireplumber.conf.d/
-
+sudo sysctl -w dev.i915.perf_stream_paranoid=0
 ```
 
-
-4. **Write the Priority Rules Configuration:**
-Create the override file in your editor:
+To make it permanent, add `dev.i915.perf_stream_paranoid=0` to `/etc/sysctl.d/60-intel.conf` and restart:
 
 ```bash
-nano ~/.config/wireplumber/wireplumber.conf.d/51-device-priority.conf
-
+sudo nano /etc/sysctl.d/60-intel.conf
 ```
 
-Add the priority definitions (**Headphones > Speakers > HDMI**):
+### 4.5 Further battery reading
 
-```spa
-monitor.alsa.rules = [
-  # 1. Headphones (Highest Priority)
-  {
-    matches = [
-      {
-        node.name = "~alsa_output.*HiFi__Headphones__sink"
-      }
-    ]
-    actions = {
-      update-props = {
-        priority.session = 2000
-      }
-    }
-  },
+[Video](https://www.youtube.com/watch?v=GDdGK8Z_qzs) · [Article](https://knowledgebase.frame.work/optimizing-fedora-battery-life-r1baXZh)
 
-  # 2. Built-in Speakers (Medium Priority)
-  {
-    matches = [
-      {
-        node.name = "~alsa_output.*HiFi__Speaker__sink"
-      }
-    ]
-    actions = {
-      update-props = {
-        priority.session = 1500
-      }
-    }
-  },
+---
 
-  # 3. HDMI / DisplayPort Outputs (Lowest Priority)
-  {
-    matches = [
-      {
-        node.name = "~alsa_output.*HiFi__HDMI.*"
-      }
-    ]
-    actions = {
-      update-props = {
-        priority.session = 1000
-      }
-    }
-  }
-]
+## 5. Audio Priority (WirePlumber)
 
-```
+Set the auto-selection priority of audio outputs: **Headphones > Speakers > HDMI**.
 
-5. **Restart WirePlumber to Apply Changes:** No sudo required.
-Restart the WirePlumber user service:
+1. List active audio devices and note the IDs under **Sinks**:
+
+   ```bash
+   wpctl status
+   ```
+
+2. Inspect their `node.name` attributes:
+
+   ```bash
+   wpctl inspect <HEADPHONES_ID> | grep 'node.name'
+   wpctl inspect <HDMI_ID> | grep 'node.name'
+   ```
+
+3. Create the user config override directory:
+
+   ```bash
+   mkdir -p ~/.config/wireplumber/wireplumber.conf.d/
+   ```
+
+4. Write the priority rules:
+
+   ```bash
+   nano ~/.config/wireplumber/wireplumber.conf.d/51-device-priority.conf
+   ```
+
+   ```spa
+   monitor.alsa.rules = [
+     # 1. Headphones (Highest Priority)
+     {
+       matches = [
+         {
+           node.name = "~alsa_output.*HiFi__Headphones__sink"
+         }
+       ]
+       actions = {
+         update-props = {
+           priority.session = 2000
+         }
+       }
+     },
+
+     # 2. Built-in Speakers (Medium Priority)
+     {
+       matches = [
+         {
+           node.name = "~alsa_output.*HiFi__Speaker__sink"
+         }
+       ]
+       actions = {
+         update-props = {
+           priority.session = 1500
+         }
+       }
+     },
+
+     # 3. HDMI / DisplayPort Outputs (Lowest Priority)
+     {
+       matches = [
+         {
+           node.name = "~alsa_output.*HiFi__HDMI.*"
+         }
+       ]
+       actions = {
+         update-props = {
+           priority.session = 1000
+         }
+       }
+     }
+   ]
+   ```
+
+5. Restart WirePlumber (no sudo required):
+
+   ```bash
+   systemctl --user restart wireplumber
+   ```
+
+---
+
+## 6. Optional Tweaks
+
+### 6.1 Swap LibreOffice for ONLYOFFICE
 
 ```bash
-systemctl --user restart wireplumber
-
+sudo dnf remove libreoffice*
+flatpak install flathub org.onlyoffice.desktopeditors
 ```
-   <br>
+
+### 6.2 Transparent terminal (Ptyxis / GNOME Terminal)
+
+Get the identifier from terminal settings under Profile:
+
+```bash
+dconf write /org/gnome/Ptyxis/Profiles/<identifier>/opacity 0.9
+```
+
+### 6.3 Firefox scrolling fix
+
+`about:config` → set `apz.touch_acceleration_factor_y` to `0.4`.
+
+### 6.4 Check firmware mode
+
+```bash
+[ -d /sys/firmware/efi ] && echo "UEFI" || echo "BIOS"
+```
+
+### 6.5 GUI settings
+
+- Turn on right click (laptops) in Settings.
+- Change the screenshot shortcut in Keyboard Shortcut settings.
+- Customise your terminal (shortcuts, colours).
+
+---
+
+## 7. Maintenance Commands
+
+```bash
+sudo fstrim -av      # Trim SSD
+sudo dnf clean all   # Clear cache
+sudo dnf autoremove  # Remove unused packages
+```

@@ -1,56 +1,132 @@
+// Zed settings
+//
+// For information on how to configure Zed, see the Zed
+// documentation: https://zed.dev/docs/configuring-zed
+//
+// To see all of Zed's default settings without changing your
+// custom settings, run `zed: open default settings` from the
+// command palette (cmd-shift-p / ctrl-shift-p)
 {
-    "workbench.colorTheme": "Tokyo Night Storm",
-    "editor.fontSize": 18,
-    "debug.console.fontSize": 16,
-    "code-runner.runInTerminal": true,
-    "editor.minimap.enabled": false,
-    "workbench.startupEditor": "none",
-    "editor.bracketPairColorization.enabled": true,
-    "extensions.autoUpdate": false,
-    "editor.cursorSmoothCaretAnimation": "on",
-    "editor.cursorBlinking": "smooth",
-    "terminal.integrated.env.windows": {},
-    "terminal.integrated.defaultProfile.windows": "Command Prompt",
-    "workbench.iconTheme": "icons",
-    "git.enableSmartCommit": true,
-    "git.confirmSync": false,
-    "[cpp]": {
-        "editor.wordBasedSuggestions": "off",
-        "editor.suggest.insertMode": "replace",
-        "editor.semanticHighlighting.enabled": true
+  "hide_mouse": "on_typing",
+  "agent_ui_font_size": 16.0,
+  "ui_font_weight": 300.0,
+  "ui_font_family": ".ZedSans",
+  "buffer_line_height": "comfortable",
+  "agent_servers": {
+    "antigravity-acp": {
+      "default_config_options": {
+        "mode": "yolo",
+        "model": "gemini-3.7-flash-low"
+      },
+      "type": "registry"
+    }
+  },
+  "edit_predictions": {
+    "provider": "zed"
+  },
+  "proxy": "",
+  "languages": {
+    "Python": {
+      "tasks": {
+        "enabled": false,
+        "prefer_lsp": false
+      }
+    }
+  },
+  "enable_language_server": false,
+  "git": {
+    "inline_blame": {
+      "enabled": false
+    }
+  },
+  "diff_view_style": "unified",
+  "icon_theme": {
+    "mode": "dark",
+    "light": "Catppuccin Macchiato",
+    "dark": "Catppuccin Macchiato",
+  },
+  "git_panel": {
+    "dock": "left",
+  },
+  "auto_update": false,
+  "buffer_font_family": "Google Sans Code",
+  "autosave": {
+    "after_delay": {
+      "milliseconds": 500,
     },
-    "git.autofetch": true,
-    "editor.accessibilitySupport": "off",
-    "[python]": {
-        "editor.formatOnType": true
+  },
+  "restore_on_file_reopen": false,
+  "close_on_file_delete": true,
+  "tabs": {
+    "file_icons": true,
+  },
+  "title_bar": {
+    "show_sign_in": true,
+    "show_menus": false,
+    "show_branch_name": false,
+    "show_project_items": false
+  },
+  "status_bar": {
+    "show_active_file": true,
+  },
+  "debugger": {
+    "button": false,
+  },
+  "search": {
+    "regex": true,
+    "button": false,
+  },
+  "diagnostics": {
+    "button": false,
+  },
+  "project_panel": {
+    "git_status_indicator": true,
+    "entry_spacing":"standard",
+    "button": true,
+    "auto_open": {
+      "on_drop": false,
+      "on_paste": false,
+      "on_create": true,
     },
-    "editor.inlineSuggest.enabled": true,
-    "github.copilot.advanced": {},
-    "liveServer.settings.donotShowInfoMsg": true,
-    "github.copilot.enable": {
-        "*": true,
-        "plaintext": false,
-        "markdown": false,
-        "scminput": false
-    },
-    "files.autoSave": "afterDelay",
-    "terminal.integrated.gpuAcceleration": "on",
-    "terminal.integrated.enableImages": true,
-    "redhat.telemetry.enabled": false,
-    "C_Cpp.configurationWarnings": "disabled",
-    "extensions.ignoreRecommendations": true,
-    "github.copilot.editor.enableAutoCompletions": true,
-    "update.showReleaseNotes": false,
-    "diffEditor.ignoreTrimWhitespace": false,
-    "github.copilot.selectedCompletionModel": "",
-    "explorer.confirmDelete": false,
-    "github.copilot.chat.codesearch.enabled": true,
-    "github.copilot.chat.newWorkspaceCreation.enabled": true,
-    "chat.agent.enabled": true,
-    "telemetry.feedback.enabled": false,
-    "code-runner.enableAppInsights": false,
-    "python.createEnvironment.trigger": "off",
-    "github.copilot.nextEditSuggestions.enabled": true,
-    "python.defaultInterpreterPath": "/bin/python",
-    "editor.fontFamily": "'Google Sans Code','Droid Sans Mono', 'monospace', monospace"
+    "dock": "left",
+    "starts_open": true,
+  },
+  "terminal": {
+    "show_count_badge": true,
+    "font_family": "Google Sans Code",
+    "shell": "system",
+  },
+  "agent": {
+    "flexible": false,
+    "sidebar_side": "right",
+    "use_modifier_to_send": true,
+    "single_file_review": true,
+    "dock": "right",
+    "play_sound_when_agent_done": "when_hidden",
+    "favorite_models": [],
+    "model_parameters": [],
+    "enable_feedback": false,
+  },
+  "disable_ai": false,
+  "telemetry": {
+    "diagnostics": false,
+    "metrics": false,
+  },
+  "session": {
+    "trust_all_worktrees": true,
+  },
+  "ui_font_size": 16.0,
+  "buffer_font_size": 14.0,
+  "theme": {
+    "mode": "dark",
+    "light": "One Light",
+    "dark": "Tokyo Night Storm",
+  },
+  "toolbar": { "breadcrumbs": false, "quick_actions": false },
+  "format_on_save":"off",
+  "hard_tabs": true,
+  "tab_size": 4,
+  "multi_cursor_modifier":"alt",
+  "colorize_brackets": true,
+  "extend_comment_on_newline": false,
 }
