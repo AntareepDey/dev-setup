@@ -168,6 +168,26 @@ sudo dnf update
 sudo dnf install cloudflare-warp
 ```
 
+**Run `warp-svc` only when needed**
+
+```bash
+sudo systemctl disable --now warp-svc
+sudo tee /etc/polkit-1/rules.d/50-warp.rules > /dev/null <<'EOF'
+polkit.addRule(function(a, s) {
+  if (a.id == "org.freedesktop.systemd1.manage-units" && a.lookup("unit") == "warp-svc.service" &&
+      s.local && s.active && s.isInGroup("wheel")) return polkit.Result.YES;
+});
+EOF
+mkdir -p ~/.local/bin && cat > ~/.local/bin/warp-cli <<'EOF'
+#!/usr/bin/env bash
+systemctl is-active -q warp-svc || { systemctl start warp-svc; for i in {1..30}; do /usr/bin/warp-cli --accept-tos status &>/dev/null && break; sleep 0.5; done; }
+/usr/bin/warp-cli "$@"; rc=$?
+[ $rc -eq 0 ] && [[ " $* " == *" disconnect "* ]] && systemctl stop warp-svc
+exit $rc
+EOF
+chmod +x ~/.local/bin/warp-cli
+```
+
 ### 3.6 Zed
 
 ```bash
