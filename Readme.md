@@ -262,20 +262,68 @@ sudo sysctl --system
 
 ### 4.3 TLP
 
-Replaces Fedora's default `tuned` / `tuned-ppd`.
+Replaces Fedora's default `tuned` / `tuned-ppd`. Needs **TLP 1.10 or newer** (check with `tlp --version`). The config uses TLP's three profiles, and `tlp-pd` connects them to the **Power Mode** switch in GNOME's Quick Settings panel.
 
-```bash
-sudo dnf remove tuned tuned-ppd
-sudo dnf install tlp tlp-rdw
-sudo systemctl enable tlp --now
-```
+1. Remove the other power managers. Only one of them can run at a time, and `tlp-pd` replaces power-profiles-daemon for the GNOME switch:
 
-Replace the config with [tlp.conf](https://github.com/AntareepDey/dev-setup/blob/main/tlp.conf):
+   ```bash
+   sudo dnf remove tuned tuned-ppd
+   sudo dnf remove power-profiles-daemon   # only if installed (older Fedora)
+   ```
 
-```bash
-sudo nano /etc/tlp.conf
-sudo systemctl restart tlp
-```
+2. Install TLP, its radio device helper and the profiles daemon:
+
+   ```bash
+   sudo dnf install tlp tlp-rdw tlp-pd
+   ```
+
+3. Install [tlp.conf](https://github.com/AntareepDey/dev-setup/blob/main/tlp.conf) (the TLP 1.10 template with the values below set):
+
+   ```bash
+   curl -fsSL -o /tmp/tlp.conf https://raw.githubusercontent.com/AntareepDey/dev-setup/main/tlp.conf
+   sudo install -m 644 /tmp/tlp.conf /etc/tlp.conf
+   sudo rm -f /etc/tlp.conf.rpmnew   # leftover template from package updates, if any
+   ```
+
+4. Enable both services and apply the config:
+
+   ```bash
+   sudo systemctl enable --now tlp tlp-pd
+   sudo tlp start
+   ```
+
+   `tlp-pd` must be **enabled**, not just running. Otherwise the GNOME switch stops working after a reboot.
+
+5. Verify:
+
+   ```bash
+   tlpctl list                                  # three profiles, * marks the active one
+   tlp-stat -s | grep -i profile                # active TLP profile
+   journalctl -b | grep -iE 'tlp.*(error|warn)' # should print nothing
+   ```
+
+   Then open Quick Settings → Power Mode and switch between the modes. `tlpctl get` should follow along.
+
+**How the modes work:**
+
+| GNOME Power Mode | When | CPU | Dell thermal profile | Devices |
+|---|---|---|---|---|
+| **Performance** | Picked manually | EPP `performance`, turbo, 100% | `performance` (Ultra: higher power and fan limits) | Wi-Fi power save off |
+| **Balanced** | Default when plugged in | EPP `balance_performance`, turbo, 100%, dynamic boost | `balanced` | Wi-Fi power save on |
+| **Power Saver** | Default on battery | EPP `balance_power`, turbo capped at 45% (~1.9 GHz), dynamic boost | `balanced` (fan stays off when idle) | Wi-Fi power save on, deepest PCIe link sleep |
+
+All three modes use active `intel_pstate` with the `powersave` governor, runtime PM `auto`, and a 15 s write-back interval. Plugging in always switches to Balanced and unplugging always switches to Power Saver (`TLP_AUTO_SWITCH=1`), even if you picked a mode manually. The battery charges from 70% up to 80%.
+
+> [!NOTE]
+> Balanced and Power Saver share TLP's `_BAT` device settings (Wi-Fi, runtime PM, write-back). Only the CPU, platform profile, PCIe ASPM and GPU settings can differ between them (`*_ON_SAV`). That's why Balanced also uses Wi-Fi power save on AC.
+
+> [!IMPORTANT]
+> These values were measured on a **Dell Inspiron 5301 (i5-1135G7, Tiger Lake)**. On other hardware, check these before using the file:
+> - `PLATFORM_PROFILE_*`: must be one of the values in `cat /sys/firmware/acpi/platform_profile_choices`. Dell offers no `low-power`, for example.
+> - `START/STOP_CHARGE_THRESH_BAT0`: the allowed ranges depend on the vendor (Dell: start 50–95, stop 55–100). See [TLP battery care](https://linrunner.de/tlp/settings/bc-vendors.html).
+> - `CPU_MAX_PERF_ON_SAV=45`: if Power Saver stutters with an external display connected, raise it to 60.
+>
+> The previous config is kept as [tlp_old.conf](https://github.com/AntareepDey/dev-setup/blob/main/tlp_old.conf) for reference. Don't use it: on battery it pinned the CPU at 400 MHz.
 
 ### 4.4 Intel iGPU
 
@@ -375,6 +423,34 @@ Set the auto-selection priority of audio outputs: **Headphones > Speakers > HDMI
    ```bash
    systemctl --user restart wireplumber
    ```
+
+### Audio power saving
+
+By default WirePlumber closes idle audio devices after 5 s, which can cause a pop or a clipped start of short sounds. Setting the timeout to 15 s keeps audio responsive during normal use but still lets the audio hardware sleep. On the Inspiron 5301 that saved about **0.5 W at idle on battery**. A timeout of `0` means "never sleep", which keeps the audio controller awake and stops the CPU package from reaching its deeper idle states.
+
+```bash
+nano ~/.config/wireplumber/wireplumber.conf.d/disable-suspend-on-idle.conf
+```
+
+```json
+{
+    "monitor.alsa.rules": [
+        {
+            "matches": [
+                { "node.name": "~alsa_input.*" },
+                { "node.name": "~alsa_output.*" }
+            ],
+            "actions": {
+                "update-props": {
+                    "session.suspend-timeout-seconds": 15
+                }
+            }
+        }
+    ]
+}
+```
+
+Then `systemctl --user restart wireplumber`. Devices wake on their own as soon as anything plays.
 
 ---
 
