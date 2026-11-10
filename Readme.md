@@ -262,9 +262,9 @@ sudo sysctl --system
 
 ### 4.3 TLP
 
-Replaces Fedora's default `tuned` / `tuned-ppd`. Needs **TLP 1.10 or newer** (check with `tlp --version`). The config uses TLP's three profiles, and `tlp-pd` connects them to the **Power Mode** switch in GNOME's Quick Settings panel.
+Replaces Fedora's default power manager with better power manager called `TLP`
 
-1. Remove the other power managers. Only one of them can run at a time, and `tlp-pd` replaces power-profiles-daemon for the GNOME switch:
+1. Remove the other power managers:
 
    ```bash
    sudo dnf remove tuned tuned-ppd
@@ -277,7 +277,7 @@ Replaces Fedora's default `tuned` / `tuned-ppd`. Needs **TLP 1.10 or newer** (ch
    sudo dnf install tlp tlp-rdw tlp-pd
    ```
 
-3. Install [tlp.conf](https://github.com/AntareepDey/dev-setup/blob/main/tlp.conf) (the TLP 1.10 template with the values below set):
+3. Install [tlp.conf](https://github.com/AntareepDey/dev-setup/blob/main/tlp.conf):
 
    ```bash
    curl -fsSL -o /tmp/tlp.conf https://raw.githubusercontent.com/AntareepDey/dev-setup/main/tlp.conf
@@ -292,38 +292,10 @@ Replaces Fedora's default `tuned` / `tuned-ppd`. Needs **TLP 1.10 or newer** (ch
    sudo tlp start
    ```
 
-   `tlp-pd` must be **enabled**, not just running. Otherwise the GNOME switch stops working after a reboot.
-
-5. Verify:
-
-   ```bash
-   tlpctl list                                  # three profiles, * marks the active one
-   tlp-stat -s | grep -i profile                # active TLP profile
-   journalctl -b | grep -iE 'tlp.*(error|warn)' # should print nothing
-   ```
-
-   Then open Quick Settings → Power Mode and switch between the modes. `tlpctl get` should follow along.
-
-**How the modes work:**
-
-| GNOME Power Mode | When | CPU | Dell thermal profile | Devices |
-|---|---|---|---|---|
-| **Performance** | Picked manually | EPP `performance`, turbo, 100% | `performance` (Ultra: higher power and fan limits) | Wi-Fi power save off |
-| **Balanced** | Default when plugged in | EPP `balance_performance`, turbo, 100%, dynamic boost | `balanced` | Wi-Fi power save on |
-| **Power Saver** | Default on battery | EPP `balance_power`, turbo capped at 45% (~1.9 GHz), dynamic boost | `balanced` (fan stays off when idle) | Wi-Fi power save on, deepest PCIe link sleep |
-
-All three modes use active `intel_pstate` with the `powersave` governor, runtime PM `auto`, and a 15 s write-back interval. Plugging in always switches to Balanced and unplugging always switches to Power Saver (`TLP_AUTO_SWITCH=1`), even if you picked a mode manually. The battery charges from 70% up to 80%.
-
-> [!NOTE]
-> Balanced and Power Saver share TLP's `_BAT` device settings (Wi-Fi, runtime PM, write-back). Only the CPU, platform profile, PCIe ASPM and GPU settings can differ between them (`*_ON_SAV`). That's why Balanced also uses Wi-Fi power save on AC.
-
 > [!IMPORTANT]
-> These values were measured on a **Dell Inspiron 5301 (i5-1135G7, Tiger Lake)**. On other hardware, check these before using the file:
-> - `PLATFORM_PROFILE_*`: must be one of the values in `cat /sys/firmware/acpi/platform_profile_choices`. Dell offers no `low-power`, for example.
-> - `START/STOP_CHARGE_THRESH_BAT0`: the allowed ranges depend on the vendor (Dell: start 50–95, stop 55–100). See [TLP battery care](https://linrunner.de/tlp/settings/bc-vendors.html).
-> - `CPU_MAX_PERF_ON_SAV=45`: if Power Saver stutters with an external display connected, raise it to 60.
->
-> The previous config is kept as [tlp_old.conf](https://github.com/AntareepDey/dev-setup/blob/main/tlp_old.conf) for reference. Don't use it: on battery it pinned the CPU at 400 MHz.
+> These values were measured on a **Dell Inspiron 5301 (i5-1135G7, Tiger Lake)**. On other hardware please alter accordingly
+
+
 
 ### 4.4 Intel iGPU
 
